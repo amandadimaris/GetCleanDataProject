@@ -1,16 +1,3 @@
-README for "run_analysis.R"
-===
-
-by: James Ferre
-
-class: Getting and Cleaning Data (getdata-002)
-___
-
-The following highlights how the "run_analysis.R" script works. Note that in addition to this markdown document the "run_analysis.R" script includes step by step comments.
-
-The "run_analysis.R" script includes a brief description of its scope and task. Note that these are only comments behind "##".
-
-```
 #### Run Analysis ####
 ## This program collects, transforms, and cleans the UCI HAR Dataset.
 
@@ -20,18 +7,10 @@ The "run_analysis.R" script includes a brief description of its scope and task. 
 ## 3. Uses descriptive activity names to name the activities in the data set
 ## 4. Appropriately labels the data set with descriptive activity names. 
 ## 5. Creates a second, independent tidy data set with the average of each variable for each activity and each subject.
-```
 
-Since the reshape2 package is required for melt and dcast, which are used later in the script, the package is loaded. Note that to reproduce this process the reshape2 package must be installed.
-
-```
 ## Load requires packages
 require(reshape2)
-```
 
-The working directory is set and objects to help in locating data folders and files are created. Note that to reproduce this process in a different computer the mainwd object must be changed accordingly.
-
-```
 ## Set wd and set object to help in loading files
 ## Note this assumes the .zip has been donwloaded to wd. 
 mainwd <- "C:/Users/James/Documents/GitHub/GetCleanDataProject"
@@ -41,20 +20,12 @@ rawdata <- "UCI HAR Dataset"
 train <- "train"
 test <- "test"
 url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
-```
 
-The .zip files is downloaded to the computer. In creating the "tidydataout.txt" file, this process was performed on 4/26/2014.
-
-```
 ## Originally donwloaded on 4/26/2014
 download.file(url, file.path(mainwd,paste(rawdata,".zip",sep="")))
 
 unzip(file.path(mainwd,paste(rawdata,".zip",sep="")))
-```
 
-The following section shows the reading of the different data tables.
-
-```
 ## Load test files
 filename <- file.path(mainwd,rawdata,test,"X_test.txt") 
 x_test <- read.table(filename)
@@ -82,13 +53,7 @@ features <- read.table(filename)
 ## activity_labels
 filename <- file.path(mainwd,rawdata,"activity_labels.txt") 
 activity_labels <- read.table(filename)
-```
 
-The following section shows how the column names of the x_ data tables are set according to the "features.txt" data table. After this, the variables which to not include "mean()" or "std()" are excluded from the x_ data tables. Note that fixed is set equal to TRUE, indicating that pattern is a string to be matched as is.
-
-Also, the column names for y_ data table is set to "activity" while the column names for subject_ is set to "subject"
-
-```
 ## assign colnames, in the case of x_test and x_train also subset desired columns, those with "mean()" and "std()"
 colnames(x_test) <- features[,c("V2")]
 colnames(x_train) <- features[,c("V2")]
@@ -103,11 +68,7 @@ colnames(y_train) <- "activity"
 
 colnames(subject_test) <- "subject"
 colnames(subject_train) <- "subject"
-```
 
-The following section highlights the merging process which is performed using column bind, at he _test and _train level, while row bind is used to combines test and train together.
-
-```
 ## Merge test data
 testdb <- cbind(y_test,subject_test,x_test)
 
@@ -117,32 +78,17 @@ traindb <- cbind(y_train,subject_train,x_train)
 ## Merge test and train data, note that this, and the prior merges relate to:
 ## 1. Merges the training and the test sets to create one data set.
 db <- rbind(testdb,traindb)
-```
 
-The following section highlights how factors are assigned to activity.
-
-```
 ## assign factors to activity, this relates to:
 ## 3. Uses descriptive activity names to name the activities in the data set
 ## 4. Appropriately labels the data set with descriptive activity names. 
 db$activity <- factor(db$activity,levels = 1:6,labels = activity_labels$V2)
 
-```
-
-The following section highlights how the data is transformed using melt and dcast from the reshape2 package.
-
-```
 ## Second tidy data set, this relates to:
 ## 5.Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
 dbmelted <- melt(db,id.vars = c("activity","subject"))
 dbcasted <- dcast(dbmelted, activity + subject ~ variable,mean)
-```
 
-
-The last section shows how the output is created. Note that the output is named "tidydataout.txt" but formatted like a .csv.
-
-```
 ## Write Results
 tidydataout <- dbcasted
 write.csv(tidydataout, file = "tidydataout.txt",row.names = FALSE)
-```
